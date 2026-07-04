@@ -17,6 +17,7 @@ let activeTabId = null;
 let scanPhase = "idle"; // idle | collecting | articles | done
 let autoProcessArticles = true;
 let displayCount = 0; // animated count, eases toward tweetsData.length
+let scanPort = null; // live Port to the content script; its disconnect stops a running scan
 
 // ---------- Animated count ----------
 
@@ -164,6 +165,20 @@ function startScan(mode, autoProcess) {
   progressIndeterminate();
 
   chrome.scripting.executeScript({ target: { tabId: activeTabId }, files: ["content.js"] }, () => {
+    // Hold a Port open to the content script for as long as this popup lives. If the
+    // popup closes mid-scan, the content script's onDisconnect fires and stops the
+    // scan, so we don't keep hitting X's API for a window nobody is watching.
+    try {
+      if (scanPort) scanPort.disconnect();
+      scanPort = chrome.tabs.connect(activeTabId, { name: "gimmie-popup" });
+      scanPort.onDisconnect.addListener(() => {
+        // Read lastError so Chrome doesn't log an unchecked-error warning.
+        void chrome.runtime.lastError;
+        scanPort = null;
+      });
+    } catch (e) {
+      /* connection is best-effort; the scan still runs without it */
+    }
     setTimeout(() => {
       chrome.tabs.sendMessage(activeTabId, { action: "start_scan", mode });
     }, 60);
@@ -567,7 +582,15 @@ function buildJsonFor(list) {
 // -------- CSV --------
 function buildCsvFor(list) {
   let csv = "﻿Type,User,Handle,Date,Text,Likes,Reposts,Replies,Quotes,Bookmarks,Views,Images,URL\n";
-  const cell = (v) => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`;
+  // Neutralize spreadsheet formula injection: a cell starting with = + - @ (or a
+  // control char that some parsers strip to reach one) is treated as a formula by
+  // Excel/Sheets. Handles always start with "@", so prefix those cells with a
+  // single quote so the value is shown as literal text.
+  const cell = (v) => {
+    let s = String(v == null ? "" : v);
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return `"${s.replace(/"/g, '""')}"`;
+  };
   list.forEach((t) => {
     const safeText = (t.text || "").replace(/[\r\n]+/g, " ");
     const imgs = (t.images || []).join(" | ");

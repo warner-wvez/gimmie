@@ -32,8 +32,12 @@
     return (document.cookie.match(/ct0=([^;]+)/) || [])[1] || "";
   }
 
+  // Fire-and-forget to the popup. When the popup is gone the send has no consumer;
+  // swallow the rejection. Popup-closed detection is handled by the Port disconnect
+  // below (sendMessage can't be relied on to reject, because the background service
+  // worker keeps the messaging channel alive).
   function post(action, extra) {
-    chrome.runtime.sendMessage(Object.assign({ action }, extra || {}));
+    return chrome.runtime.sendMessage(Object.assign({ action }, extra || {})).catch(() => {});
   }
 
   function normImg(url) {
@@ -584,6 +588,17 @@
       scanning = false;
     }
   }
+
+  // The popup holds a long-lived Port open for its whole lifetime. When the popup
+  // closes, onDisconnect fires here reliably (unlike sendMessage, which resolves
+  // against the background context and never rejects). If a scan is in flight, stop
+  // it: no one is listening, and continuing just burns the user's X rate limit.
+  chrome.runtime.onConnect.addListener((port) => {
+    if (port.name !== "gimmie-popup") return;
+    port.onDisconnect.addListener(() => {
+      if (scanning) stopRequested = true;
+    });
+  });
 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "start_scan" && request.mode) {
