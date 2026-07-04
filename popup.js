@@ -1,9 +1,8 @@
 // ============================================================
-// Bookmark Exporter - popup logic
-// Collection now runs through content.js (X's own data API, with a
-// page-scraping fallback). This file drives the UI, the live activity
-// readout, and the exports.
-// Views: welcome -> start -> scan/results -> detail
+// GIMMIE - popup logic
+// Collection runs through content.js (X's own data API, with a page-scraping
+// fallback). This file drives the UI, the live activity readout, and the exports.
+// Views: welcome -> scan/results -> detail
 // ============================================================
 
 let tweetsData = [];

@@ -50,6 +50,8 @@ GIMMIE reads your bookmarks the same way the X website itself does, using your e
 
 Because it depends on how X structures its data, X changing its site can occasionally break collection until GIMMIE is updated. If something stops working, please open an issue.
 
+**Want the deep version?** [ARCHITECTURE.md](ARCHITECTURE.md) is a full, code-level walkthrough: how it replays X's private GraphQL API with your session, how article `content_state` is reconstructed, the popup/content-script messaging and lifecycle Port, the dependency-free ZIP writer, and the security model. It's plain vanilla JS with no build step, so the source you read is the source that runs.
+
 ## Formats
 
 | Format | Best for |

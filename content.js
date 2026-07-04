@@ -1,8 +1,8 @@
 (function () {
   // Re-injected on every scan. Guard so we only register one message listener
   // and keep state across injections.
-  if (window.__bmExporterLoaded) return;
-  window.__bmExporterLoaded = true;
+  if (window.__gimmieLoaded) return;
+  window.__gimmieLoaded = true;
 
   const STORAGE_KEY = "latest_exported_tweet_id";
   const NO_NEW_THRESHOLD = 5;
@@ -611,7 +611,7 @@
     try {
       await runApiScan(mode);
     } catch (e) {
-      console.log("[Bookmark Exporter] API path unavailable, using page scan:", e.message);
+      console.log("[GIMMIE] API path unavailable, using page scan:", e.message);
       post("scan_status", { phase: "collecting", note: "Reading the page directly" });
       try {
         await runDomScan(mode);
