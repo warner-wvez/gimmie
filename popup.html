@@ -580,7 +580,8 @@
       display: inline-flex; align-items: center; gap: 5px;
       background: var(--btn-bg); color: var(--btn-fg); border: none;
       border-radius: 999px; padding: 8px 13px; font-size: 12.5px; font-weight: 700;
-      font-family: inherit; cursor: pointer; transition: background 0.2s, transform 0.1s;
+      font-family: inherit; cursor: pointer; text-decoration: none;
+      transition: background 0.2s, transform 0.1s;
     }
     .star-go:hover { background: var(--btn-bg-hover); }
     .star-go:active { transform: scale(0.97); }
@@ -757,10 +758,10 @@
       <span>If GIMMIE helped, a star on GitHub goes a long way.</span>
     </div>
     <div class="star-actions">
-      <button id="starGoBtn" class="star-go">
+      <a id="starGoBtn" class="star-go" href="https://github.com/warner-wvez/gimmie" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6 6.6.6-5 4.4 1.5 6.5L12 17.9 6 20.5l1.5-6.5-5-4.4 6.6-.6z"/></svg>
         Star
-      </button>
+      </a>
       <button id="starDismissBtn" class="star-x" title="No thanks" aria-label="Dismiss">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>

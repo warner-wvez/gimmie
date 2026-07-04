@@ -791,7 +791,6 @@ function exportList(list, format) {
 // ---------- "Star the repo" nudge, shown after an export ----------
 // Appears at most once per popup session, stops for good once the user stars or
 // dismisses, and gives up on its own after a few ignored showings so it never nags.
-const REPO_URL = "https://github.com/warner-wvez/gimmie";
 const STAR_KEY = "gimmie-star";
 const STAR_MAX_SHOWS = 3;
 let starShownThisSession = false;
@@ -836,10 +835,9 @@ function hideStarPrompt(done) {
   }
 }
 
-document.getElementById("starGoBtn").addEventListener("click", () => {
-  chrome.tabs.create({ url: REPO_URL });
-  hideStarPrompt(true);
-});
+// The Star control is a real link (leads straight to the repo). Let it navigate on
+// its own; we only record that the user acted so the prompt won't return.
+document.getElementById("starGoBtn").addEventListener("click", () => hideStarPrompt(true));
 document.getElementById("starDismissBtn").addEventListener("click", () => hideStarPrompt(true));
 
 // Wire every format button in the export bar (data-format attribute).
