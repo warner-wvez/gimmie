@@ -323,19 +323,31 @@ function applyUpdate(id, data) {
 function finishScan(info) {
   scanPhase = "done";
   progressDone();
-  setActivity(info && info.via === "dom" ? "Done (read from the page)" : "Done");
+  const failed = info && info.via === "error";
+  setActivity(failed ? "Couldn't finish" : info && info.via === "dom" ? "Done (read from the page)" : "Done");
   document.getElementById("activity").classList.add("done");
   document.getElementById("stopBtn").style.display = "none";
   document.getElementById("scanAgainBtn").style.display = "block";
 
   if (tweetsData.length === 0) {
-    document.getElementById("count-label").innerText = "found";
     document.getElementById("flow-row").style.display = "none";
-    document.getElementById("results-area").innerHTML = `
-      <div class="empty">
-        <b>Nothing found yet</b>
-        Make sure you're on your X bookmarks page and have posts saved, then try again.
-      </div>`;
+    // A genuine failure (blocked, signed out, X changed) is not the same as an
+    // empty bookmarks list. Say which, so the user isn't sent to check the wrong thing.
+    if (failed) {
+      document.getElementById("count-label").innerText = "couldn't load";
+      document.getElementById("results-area").innerHTML = `
+        <div class="empty">
+          <b>Something went wrong</b>
+          We couldn't read your bookmarks. Make sure you're signed in to X, then hit Start over to try again. If it keeps happening, X may have changed and GIMMIE needs an update.
+        </div>`;
+    } else {
+      document.getElementById("count-label").innerText = "found";
+      document.getElementById("results-area").innerHTML = `
+        <div class="empty">
+          <b>Nothing found yet</b>
+          Make sure you're on your X bookmarks page and have posts saved, then try again.
+        </div>`;
+    }
     return;
   }
 
@@ -434,9 +446,9 @@ function buildDetailHTML(tweet) {
     html += `<div class="d-label">Media (${tweet.images.length}), in order</div>`;
     tweet.images.forEach((src, i) => {
       html += `
-        <a class="img-row" href="${src}" target="_blank">
+        <a class="img-row" href="${safeUrl(src)}" target="_blank">
           <span class="img-idx">${i + 1}</span>
-          <span class="img-url">${src}</span>
+          <span class="img-url">${escHtml(src)}</span>
         </a>`;
     });
   }
@@ -445,7 +457,7 @@ function buildDetailHTML(tweet) {
     html += `<div class="d-label">Engagement</div>${statsRowHtml(tweet.stats).replace("stat-row", "stat-row stat-row-detail")}`;
   }
 
-  html += `<div class="d-source"><a href="${tweet.url}" target="_blank">${tweet.url}</a></div>`;
+  html += `<div class="d-source"><a href="${safeUrl(tweet.url)}" target="_blank">${escHtml(tweet.url)}</a></div>`;
   return html;
 }
 
@@ -628,7 +640,7 @@ function buildPrintBodyHtml(list) {
     }
     rows += `<article>
       <h2>${i + 1}. ${type} — ${esc(t.user)} <span class="h">${esc(t.handle)}</span></h2>
-      <div class="meta">${shortDate(t)} · <a href="${esc(t.url)}">${esc(t.url)}</a>${
+      <div class="meta">${shortDate(t)} · <a href="${safeUrl(t.url)}">${esc(t.url)}</a>${
       t.stats ? " · " + esc(statsInline(t.stats)) : ""
     }</div>
       ${body}
@@ -801,5 +813,13 @@ function escHtml(str) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// URL for an href: escape it for attribute context and refuse any scheme other
+// than http(s), so a hostile value can't smuggle in javascript:/data: links.
+function safeUrl(u) {
+  const s = String(u || "");
+  return /^https?:\/\//i.test(s) ? escHtml(s) : "#";
 }

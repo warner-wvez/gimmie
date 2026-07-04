@@ -32,9 +32,12 @@
     const cord = sw.querySelector(".cord");
     const bulb = sw.querySelector(".bulb");
 
-    const BASE = 16; // resting cord length
-    const MAX = 64; // how far it can be pulled
-    const THRESHOLD = 24; // pull past this = a deliberate toggle
+    // Kept deliberately small: an extension popup closes the instant the pointer
+    // leaves its bounds, so a long drag would dismiss the popup mid-gesture. A
+    // short pull (and a plain tap) keep the whole interaction inside the window.
+    const BASE = 14; // resting cord length
+    const MAX = 30; // how far it can be pulled (stays within the popup)
+    const THRESHOLD = 18; // pull past this = a deliberate toggle
     const TAP = 4; // pull under this = a tap (also toggles)
 
     let dragging = false;
