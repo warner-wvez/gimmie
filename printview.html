@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>X Bookmarks Archive</title>
+  <style>
+    body {
+      font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #0f1419; max-width: 720px; margin: 0 auto; padding: 32px 20px;
+    }
+    h1 { font-size: 24px; margin: 0 0 4px; }
+    .sub { color: #536471; margin-bottom: 24px; }
+    .hint {
+      background: #e8f5fe; border: 1px solid #bae6fd; color: #0369a1;
+      border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 24px;
+    }
+    article { border-top: 2px solid #eff3f4; padding: 18px 0; page-break-inside: avoid; }
+    h2 { font-size: 16px; margin: 0 0 4px; }
+    h2 .h { color: #536471; font-weight: 400; }
+    .meta { color: #536471; font-size: 12px; margin-bottom: 10px; word-break: break-all; }
+    .meta a { color: #1d9bf0; text-decoration: none; }
+    p { margin: 0 0 10px; white-space: pre-wrap; }
+    img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
+    @media print { .hint { display: none; } a { color: #1d9bf0; } }
+  </style>
+</head>
+<body>
+  <div class="hint">Your archive is ready. The print dialog should open automatically. Choose "Save as PDF" as the destination. If it did not open, press Cmd/Ctrl + P.</div>
+  <div id="root"></div>
+  <script src="printview.js"></script>
+</body>
+</html>

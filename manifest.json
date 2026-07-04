@@ -1,0 +1,24 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "icon.png",
+         "16": "icon.png",
+         "48": "icon.png"
+      },
+      "default_popup": "popup.html"
+   },
+   "background": {
+      "service_worker": "background.js"
+   },
+   "description": "Export your X bookmarks, with engagement stats and full article text, to a clean Markdown or CSV file. One click to NotebookLM.",
+   "icons": {
+      "128": "icon.png",
+      "16": "icon.png",
+      "48": "icon.png"
+   },
+   "manifest_version": 3,
+   "name": "GIMMIE - X Bookmark Exporter",
+   "permissions": [ "activeTab", "scripting", "storage" ],
+   "host_permissions": [ "https://x.com/*", "https://twitter.com/*" ],
+   "version": "1.1"
+}
