@@ -19,6 +19,11 @@ let autoProcessArticles = true;
 let displayCount = 0; // animated count, eases toward tweetsData.length
 let scanPort = null; // live Port to the content script; its disconnect stops a running scan
 
+// Filter + sort state for the results list.
+let sortBy = "recent"; // recent | oldest | posted_new | posted_old | likes | views | reposts
+let typeFilter = "all"; // all | tweet | article
+let searchText = "";
+
 // ---------- Animated count ----------
 // Runs only while the displayed number is catching up to the real count, then
 // stops. animateCount() restarts it whenever a new card arrives.
@@ -168,6 +173,8 @@ function startScan(mode, autoProcess) {
   stopBtn.style.display = "block";
   stopBtn.disabled = false;
   document.getElementById("results-area").innerHTML = "";
+  document.getElementById("no-match").style.display = "none";
+  resetControls();
   document.getElementById("flow-row").style.display = "flex";
   document.getElementById("activity").classList.remove("done");
   setFlowStep("collect");
@@ -238,6 +245,7 @@ function addCard(tweet) {
   tweetsData.push(tweet);
   idToIndex.set(tweet.id, index);
   animateCount(); // ease the counter up to the new total
+  if (index === 0) document.getElementById("controls").style.display = "flex";
 
   const isArticle = tweet.type === "article";
   const imgCount = tweet.images ? tweet.images.length : 0;
@@ -274,6 +282,9 @@ function addCard(tweet) {
   cardEls[index] = div;
   document.getElementById("results-area").appendChild(div);
   requestAnimationFrame(() => div.classList.remove("card-enter"));
+  // Keep a live filter honest as cards stream in (a changed sort is applied in full
+  // when the scan finishes or the user touches a control).
+  if (filtersActive() && !tweetMatches(tweet)) div.style.display = "none";
 }
 
 function fmt(n) {
@@ -302,6 +313,86 @@ function statIcon(kind) {
     Views: '<path d="M18 20V10M12 20V4M6 20v-6"/>',
   };
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${paths[kind] || ""}</svg>`;
+}
+
+// ---------- Filter + sort ----------
+
+function tweetMatches(t) {
+  if (typeFilter !== "all" && t.type !== typeFilter) return false;
+  if (searchText) {
+    const hay = `${t.user || ""} ${t.handle || ""} ${t.text || ""}`.toLowerCase();
+    if (!hay.includes(searchText)) return false;
+  }
+  return true;
+}
+
+const _dateMs = (t) => Date.parse(t.date || "") || 0;
+const _stat = (t, f) => (t.stats && typeof t.stats[f] === "number" ? t.stats[f] : 0);
+
+// Returns tweetsData indices in the order they should display, honoring the sort.
+// Insertion order is "recently bookmarked" (X returns newest bookmarks first).
+function sortIndices(indices) {
+  const arr = indices.slice();
+  switch (sortBy) {
+    case "oldest":
+      return arr.reverse();
+    case "posted_new":
+      return arr.sort((a, b) => _dateMs(tweetsData[b]) - _dateMs(tweetsData[a]));
+    case "posted_old":
+      return arr.sort((a, b) => _dateMs(tweetsData[a]) - _dateMs(tweetsData[b]));
+    case "likes":
+      return arr.sort((a, b) => _stat(tweetsData[b], "likes") - _stat(tweetsData[a], "likes"));
+    case "views":
+      return arr.sort((a, b) => _stat(tweetsData[b], "views") - _stat(tweetsData[a], "views"));
+    case "reposts":
+      return arr.sort((a, b) => _stat(tweetsData[b], "reposts") - _stat(tweetsData[a], "reposts"));
+    case "recent":
+    default:
+      return arr;
+  }
+}
+
+// Indices currently visible (pass the filter), in sorted order.
+function visibleOrderedIndices() {
+  const visible = tweetsData.map((_, i) => i).filter((i) => tweetMatches(tweetsData[i]));
+  return sortIndices(visible);
+}
+
+function filtersActive() {
+  return typeFilter !== "all" || searchText !== "" || sortBy !== "recent";
+}
+
+// Hide non-matching cards, reorder the visible ones in the DOM per the sort, and
+// keep the empty-state + export label in sync. Indices never change, so selection
+// and enrichment updates stay valid.
+function applyFilterSort() {
+  const area = document.getElementById("results-area");
+  tweetsData.forEach((t, i) => {
+    if (cardEls[i]) cardEls[i].style.display = tweetMatches(t) ? "" : "none";
+  });
+  const ordered = visibleOrderedIndices();
+  ordered.forEach((i) => {
+    if (cardEls[i]) area.appendChild(cardEls[i]);
+  });
+  const hasResults = tweetsData.length > 0;
+  document.getElementById("no-match").style.display =
+    hasResults && ordered.length === 0 ? "block" : "none";
+  updateExportLabel(ordered.length);
+}
+
+// When a filter/search narrows the list, the bulk export follows what's shown.
+function updateExportLabel(visibleCount) {
+  const label = document.getElementById("export-label");
+  if (!label) return;
+  const total = tweetsData.length;
+  label.textContent =
+    filtersActive() && visibleCount < total ? `Download ${visibleCount} shown` : "Download all";
+}
+
+// The list the bulk export uses: filtered + sorted, so you export exactly what you
+// see, in the order you see it.
+function currentExportList() {
+  return visibleOrderedIndices().map((i) => tweetsData[i]);
 }
 
 // Article enrichment arrived: refresh that card's preview + badge + stats
@@ -363,6 +454,7 @@ function finishScan(info) {
   }
 
   document.getElementById("scan-count").classList.add("done");
+  applyFilterSort(); // settle the final order/filter now that everything is in
   if (autoProcessArticles) {
     document.getElementById("count-label").innerText = "ready to export";
     document.getElementById("export-bar").style.display = "block";
@@ -370,6 +462,55 @@ function finishScan(info) {
     document.getElementById("count-label").innerText = "open one, or check posts to download";
   }
 }
+
+// ---------- Filter/sort controls wiring ----------
+
+function resetControls() {
+  sortBy = "recent";
+  typeFilter = "all";
+  searchText = "";
+  const s = document.getElementById("filterSearch");
+  if (s) s.value = "";
+  document.getElementById("filterClear").style.display = "none";
+  document.getElementById("sortBy").value = "recent";
+  document.querySelectorAll("#typeFilter .seg-btn").forEach((b) =>
+    b.classList.toggle("active", b.dataset.type === "all")
+  );
+  document.getElementById("controls").style.display = "none";
+}
+
+let searchDebounce = null;
+document.getElementById("filterSearch").addEventListener("input", (e) => {
+  const v = e.target.value;
+  document.getElementById("filterClear").style.display = v ? "flex" : "none";
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => {
+    searchText = v.trim().toLowerCase();
+    applyFilterSort();
+  }, 120);
+});
+
+document.getElementById("filterClear").addEventListener("click", () => {
+  const s = document.getElementById("filterSearch");
+  s.value = "";
+  searchText = "";
+  document.getElementById("filterClear").style.display = "none";
+  applyFilterSort();
+  s.focus();
+});
+
+document.getElementById("sortBy").addEventListener("change", (e) => {
+  sortBy = e.target.value;
+  applyFilterSort();
+});
+
+document.querySelectorAll("#typeFilter .seg-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    typeFilter = btn.dataset.type;
+    document.querySelectorAll("#typeFilter .seg-btn").forEach((b) => b.classList.toggle("active", b === btn));
+    applyFilterSort();
+  });
+});
 
 document.getElementById("scanAgainBtn").addEventListener("click", () => location.reload());
 
@@ -840,16 +981,18 @@ function hideStarPrompt(done) {
 document.getElementById("starGoBtn").addEventListener("click", () => hideStarPrompt(true));
 document.getElementById("starDismissBtn").addEventListener("click", () => hideStarPrompt(true));
 
-// Wire every format button in the export bar (data-format attribute).
+// Wire every format button in the export bar. Exports follow the current filter and
+// sort, so you get exactly what's shown, in the order it's shown.
 document.querySelectorAll("#export-bar [data-format]").forEach((btn) => {
-  btn.addEventListener("click", () => exportList(tweetsData, btn.dataset.format));
+  btn.addEventListener("click", () => exportList(currentExportList(), btn.dataset.format));
 });
 
 // NotebookLM: a deliberate, secondary action. Downloads the markdown, then opens
 // NotebookLM so the user can drop the file in. Only on explicit click.
 document.getElementById("btnNotebookLM").addEventListener("click", () => {
-  if (!tweetsData.length) return;
-  exportList(tweetsData, "md");
+  const list = currentExportList();
+  if (!list.length) return;
+  exportList(list, "md");
   chrome.tabs.create({ url: "https://notebooklm.google.com/" });
 });
 

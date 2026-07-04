@@ -561,6 +561,56 @@
     /* Keep the sticky top bars clear of the hanging bulb */
     .scanbar, .detail-head { padding-right: 40px; }
 
+    /* ---------- Filter + sort controls ---------- */
+    .controls {
+      padding: 10px 14px; background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex; flex-direction: column; gap: 9px;
+    }
+    .search-wrap { position: relative; display: flex; align-items: center; }
+    .search-wrap .search-ic {
+      position: absolute; left: 11px; width: 15px; height: 15px; color: var(--muted); pointer-events: none;
+    }
+    #filterSearch {
+      width: 100%; box-sizing: border-box;
+      padding: 9px 32px 9px 32px;
+      border: 1px solid var(--border); border-radius: 999px;
+      background: var(--bg); color: var(--ink);
+      font-size: 13px; font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    #filterSearch:focus { outline: none; border-color: var(--blue); }
+    #filterSearch::placeholder { color: var(--muted); }
+    .search-clear {
+      position: absolute; right: 8px; background: transparent; border: none;
+      color: var(--muted); cursor: pointer; padding: 4px; display: flex; border-radius: 6px;
+    }
+    .search-clear:hover { color: var(--ink); }
+    .search-clear svg { width: 14px; height: 14px; }
+
+    .controls-row { display: flex; align-items: center; gap: 8px; }
+    .seg {
+      display: inline-flex; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 999px; padding: 2px; gap: 2px;
+    }
+    .seg-btn {
+      border: none; background: transparent; color: var(--muted);
+      font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer;
+      padding: 5px 11px; border-radius: 999px; transition: background 0.15s, color 0.15s;
+    }
+    .seg-btn:hover:not(.active) { color: var(--ink); }
+    .seg-btn.active { background: var(--surface); color: var(--blue); box-shadow: 0 1px 3px var(--shadow); }
+    .sort-select {
+      flex: 1; min-width: 0;
+      padding: 7px 10px; border: 1px solid var(--border); border-radius: 999px;
+      background: var(--bg); color: var(--ink);
+      font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer;
+    }
+    .sort-select:focus { outline: none; border-color: var(--blue); }
+
+    .no-match { text-align: center; padding: 40px 24px; color: var(--muted); }
+    .no-match b { color: var(--ink); display: block; margin-bottom: 4px; font-size: 15px; }
+
     /* ---------- Star prompt (slides up after an export) ---------- */
     .star-toast {
       position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 300;
@@ -699,7 +749,37 @@
     </div>
     <div class="activity" id="activity"><span class="live-dot"></span><span id="activity-text">Getting started...</span></div>
 
+    <div class="controls" id="controls" style="display:none;">
+      <div class="search-wrap">
+        <svg class="search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input id="filterSearch" type="text" placeholder="Search by text, name, or handle" autocomplete="off" spellcheck="false">
+        <button id="filterClear" class="search-clear" title="Clear" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="controls-row">
+        <div class="seg" id="typeFilter">
+          <button class="seg-btn active" data-type="all">All</button>
+          <button class="seg-btn" data-type="tweet">Tweets</button>
+          <button class="seg-btn" data-type="article">Articles</button>
+        </div>
+        <select id="sortBy" class="sort-select" title="Sort">
+          <option value="recent">Recently bookmarked</option>
+          <option value="oldest">Oldest bookmarked</option>
+          <option value="posted_new">Newest posted</option>
+          <option value="posted_old">Oldest posted</option>
+          <option value="likes">Most liked</option>
+          <option value="views">Most viewed</option>
+          <option value="reposts">Most reposted</option>
+        </select>
+      </div>
+    </div>
+
     <div id="results-area"></div>
+    <div class="no-match" id="no-match" style="display:none;">
+      <b>No matches</b>
+      Nothing here fits your search or filter. Try clearing them.
+    </div>
 
     <div id="bottom-bars">
       <div class="selbar" id="selbar" style="display:none;">
@@ -716,7 +796,7 @@
         </div>
       </div>
       <div class="export" id="export-bar" style="display:none;">
-        <div class="export-label">Download all</div>
+        <div class="export-label" id="export-label">Download all</div>
         <button class="btn btn-primary" data-format="md">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg>
           Markdown
