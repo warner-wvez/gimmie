@@ -4,6 +4,8 @@ Turn the guides, threads, and how-tos you bookmark on X into clean files your LL
 
 GIMMIE pulls the full text of posts and articles, keeps images in order, includes engagement stats, and exports to Markdown, PDF, JSON, CSV, or ZIP. Everything runs locally in your browser: your bookmarks never leave your machine and GIMMIE collects nothing about you. See [PRIVACY.md](PRIVACY.md).
 
+> **Still early.** GIMMIE works today, but I'm actively sharpening it. Expect rough edges, and if something breaks or you have an idea, please open an issue.
+
 ## What it's for
 
 X is full of people breaking down exactly how they did something: how they grew an account, wired up a stack, ran a launch, fixed a bug. You bookmark those threads, then never dig them back up. GIMMIE gets that content out of X and into a file your AI tools can use:
@@ -17,7 +19,8 @@ The export is structured for AI tools by default, so the model reads the whole p
 ## What it does
 
 - **Shows your bookmarks the moment you open it.** No button to press, no scrolling. Open GIMMIE on your bookmarks page and it loads them all instantly through X's own data channel using your logged-in session.
-- **Reads full articles.** Long-form X articles come through complete: title, every paragraph in order, and every image placed inline where the author put it.
+- **Reads full articles at lightning speed.** Long-form X articles come through complete, not just the tweet: title, every paragraph in order, and every image placed inline where the author put it. It pulls them in seconds, no opening each one by hand.
+- **Markdown is built for LLMs; the rest are there when you need them.** Markdown is the format to hand your AI tools. PDF, JSON, CSV, and ZIP are included for other use cases, reading, spreadsheets, backups, or feeding other software.
 - **Captures engagement stats.** Likes, reposts, replies, quotes, bookmarks, and views for every post.
 - **Search, filter, and sort.** Search by text, name, or handle; filter to tweets or articles; sort by recently or oldest bookmarked, newest or oldest posted, or most liked, viewed, and reposted.
 - **Exports in the format you want.** Markdown (recommended for AI tools), PDF, JSON, CSV, or a ZIP bundle. Exports follow whatever you've filtered and sorted, so you get exactly what you see.
