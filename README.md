@@ -1,8 +1,18 @@
 # GIMMIE — X Bookmark Exporter
 
-Save your X (Twitter) bookmarks as a clean, well-structured file, ready for NotebookLM and other AI tools. GIMMIE pulls the full text of posts and articles, keeps images in order, includes engagement stats, and lets you export everything or just the posts you pick.
+Turn the guides, threads, and how-tos you bookmark on X into clean files your LLM can actually read, so you can hand a whole playbook to Claude, ChatGPT, or NotebookLM and have it apply the steps to your own project.
 
-Everything runs locally in your browser. Your bookmarks never leave your machine, and GIMMIE collects nothing about you. See [PRIVACY.md](PRIVACY.md).
+GIMMIE pulls the full text of posts and articles, keeps images in order, includes engagement stats, and exports to Markdown, PDF, JSON, CSV, or ZIP. Everything runs locally in your browser: your bookmarks never leave your machine and GIMMIE collects nothing about you. See [PRIVACY.md](PRIVACY.md).
+
+## What it's for
+
+X is full of people breaking down exactly how they did something: how they grew an account, wired up a stack, ran a launch, fixed a bug. You bookmark those threads, then never dig them back up. GIMMIE gets that content out of X and into a file your AI tools can use:
+
+1. Find a thread or article that breaks down how to do the thing you're working on.
+2. Export it with GIMMIE as a single Markdown file, full text and images and all.
+3. Drop the file into your LLM: *"here's a guide, apply it to my project step by step."*
+
+The export is structured for AI tools by default, so the model reads the whole playbook in order and can walk you through applying it to your situation. One bookmarked guide becomes a coach that has already read the exact steps.
 
 ## What it does
 
