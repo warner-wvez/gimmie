@@ -176,7 +176,9 @@ function startScan(mode, autoProcess) {
   document.getElementById("no-match").style.display = "none";
   resetControls();
   document.getElementById("flow-row").style.display = "flex";
-  document.getElementById("activity").classList.remove("done");
+  const activityEl = document.getElementById("activity");
+  activityEl.style.display = "";
+  activityEl.classList.remove("done");
   setFlowStep("collect");
   setActivity("Getting started...");
   progressIndeterminate();
@@ -426,13 +428,14 @@ function finishScan(info) {
   scanPhase = "done";
   progressDone();
   const failed = info && info.via === "error";
-  setActivity(failed ? "Couldn't finish" : info && info.via === "dom" ? "Done (read from the page)" : "Done");
-  document.getElementById("activity").classList.add("done");
   document.getElementById("stopBtn").style.display = "none";
   document.getElementById("scanAgainBtn").style.display = "block";
+  // The live progress readouts have done their job; the green count now signals
+  // "done", so hide them at rest instead of leaving Ready/Done stacked and cramped.
+  document.getElementById("flow-row").style.display = "none";
+  document.getElementById("activity").style.display = "none";
 
   if (tweetsData.length === 0) {
-    document.getElementById("flow-row").style.display = "none";
     // A genuine failure (blocked, signed out, X changed) is not the same as an
     // empty bookmarks list. Say which, so the user isn't sent to check the wrong thing.
     if (failed) {
@@ -459,7 +462,7 @@ function finishScan(info) {
     document.getElementById("count-label").innerText = "ready to export";
     document.getElementById("export-bar").style.display = "block";
   } else {
-    document.getElementById("count-label").innerText = "open one, or check posts to download";
+    document.getElementById("count-label").innerText = "pick posts to export";
   }
 }
 
