@@ -13,7 +13,7 @@
   const BEARER =
     "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
 
-  // Last-known-good query ids. These can drift when X redeploys; discoverQueryIds()
+  // Last-known-good query ids. These can drift when X redeploys; getQueryIds()
   // refreshes them from X's own loaded code, and the whole API path falls back to
   // DOM scraping if anything here goes stale.
   const DEFAULT_QIDS = {
@@ -56,9 +56,16 @@
   // Query-id discovery (best effort; DEFAULT_QIDS is the fallback)
   // ---------------------------------------------------------------------------
 
-  async function discoverQueryIds() {
+  // Discovery scans X's bundles and is slow, so its result is cached for the life
+  // of this content script. A scan, plus any on-demand article fetches, all reuse
+  // the same ids instead of re-downloading and re-parsing the bundles each time.
+  let qidCache = null;
+
+  async function getQueryIds() {
+    if (qidCache) return qidCache;
     const found = Object.assign({}, DEFAULT_QIDS);
     const wanted = Object.keys(found);
+    const discovered = Object.create(null); // which ops we actually found in the bundles
     try {
       const srcs = [
         ...new Set(
@@ -70,7 +77,8 @@
         ),
       ];
       for (const src of srcs) {
-        if (wanted.every((w) => found[w] !== DEFAULT_QIDS[w])) break;
+        // Stop once we've found every wanted op at least once in the bundles.
+        if (wanted.every((w) => discovered[w])) break;
         let txt = "";
         try {
           txt = await (await fetch(src)).text();
@@ -80,12 +88,16 @@
         for (const m of txt.matchAll(
           /queryId:"([^"]{15,30})"\s*,\s*operationName:"([A-Za-z]+)"/g
         )) {
-          if (wanted.includes(m[2])) found[m[2]] = m[1];
+          if (wanted.includes(m[2])) {
+            found[m[2]] = m[1];
+            discovered[m[2]] = true;
+          }
         }
       }
     } catch (e) {
       /* keep defaults */
     }
+    qidCache = found;
     return found;
   }
 
@@ -279,13 +291,19 @@
     });
 
     const parts = [];
+    let atomicSeen = 0;
+    let atomicResolved = 0;
     for (const b of cs.blocks) {
       if (b.type === "atomic") {
         // Atomic blocks reference an entity (image) via entityRanges[].key.
+        atomicSeen++;
         const key = b.entityRanges && b.entityRanges[0] && b.entityRanges[0].key;
         const mediaId = entityMap[key];
         const url = mediaId && mediaById[mediaId];
-        if (url) parts.push({ type: "image", value: url });
+        if (url) {
+          parts.push({ type: "image", value: url });
+          atomicResolved++;
+        }
       } else {
         const text = (b.text || "").trim();
         if (!text) continue;
@@ -294,6 +312,14 @@
         else if (b.type === "ordered-list-item") parts.push({ type: "text", value: "1. " + text });
         else parts.push({ type: "text", value: text });
       }
+    }
+    // If some inline images didn't resolve, say so loudly. Silent loss would mean
+    // shipping incomplete exports with no signal that X changed its article format.
+    if (atomicSeen > atomicResolved) {
+      console.warn(
+        `[GIMMIE] Article ${art.rest_id || "?"}: ${atomicSeen - atomicResolved} of ${atomicSeen} ` +
+          `inline images could not be matched. X's article format may have changed.`
+      );
     }
     return parts.length ? parts : null;
   }
@@ -357,7 +383,7 @@
   }
 
   async function runApiScan(mode) {
-    const qids = await discoverQueryIds();
+    const qids = await getQueryIds();
 
     let watermarkId = null;
     if (mode === "smart_sync") {
@@ -618,7 +644,7 @@
     if (request.action === "fetch_article" && request.tweet) {
       (async () => {
         try {
-          const qids = await discoverQueryIds();
+          const qids = await getQueryIds();
           const data = await fetchArticle(qids, request.tweet);
           sendResponse({ ok: true, data });
         } catch (e) {

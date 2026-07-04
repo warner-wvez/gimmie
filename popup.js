@@ -20,19 +20,29 @@ let displayCount = 0; // animated count, eases toward tweetsData.length
 let scanPort = null; // live Port to the content script; its disconnect stops a running scan
 
 // ---------- Animated count ----------
+// Runs only while the displayed number is catching up to the real count, then
+// stops. animateCount() restarts it whenever a new card arrives.
+
+let countRAF = null;
 
 function tickCount() {
   const el = document.getElementById("count");
-  if (!el) return;
   const target = tweetsData.length;
-  if (displayCount !== target) {
+  if (el && displayCount !== target) {
     const step = Math.max(1, Math.ceil((target - displayCount) / 4));
     displayCount = Math.min(target, displayCount + step);
     el.innerText = displayCount;
   }
-  requestAnimationFrame(tickCount);
+  if (displayCount !== target) {
+    countRAF = requestAnimationFrame(tickCount);
+  } else {
+    countRAF = null; // caught up; stop spinning
+  }
 }
-requestAnimationFrame(tickCount);
+
+function animateCount() {
+  if (countRAF == null) countRAF = requestAnimationFrame(tickCount);
+}
 
 // ---------- Progress + activity readout ----------
 
@@ -87,7 +97,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
   const tab = tabs[0];
   activeTabId = tab.id;
   const url = tab.url || "";
-  const onBookmarks = url.includes("x.com/i/bookmarks") || url.includes("twitter.com/i/bookmarks");
+  const onBookmarks = url.includes("x.com/i/bookmarks");
   if (!onBookmarks) {
     showView("welcome");
     return;
@@ -227,6 +237,7 @@ function addCard(tweet) {
   const index = tweetsData.length;
   tweetsData.push(tweet);
   idToIndex.set(tweet.id, index);
+  animateCount(); // ease the counter up to the new total
 
   const isArticle = tweet.type === "article";
   const imgCount = tweet.images ? tweet.images.length : 0;
@@ -371,6 +382,14 @@ function requestArticle(index) {
   t._fetching = true;
   chrome.tabs.sendMessage(activeTabId, { action: "fetch_article", tweet: t }, (resp) => {
     t._fetching = false;
+    // Read lastError so Chrome doesn't log an unchecked-error warning, and so a
+    // dropped message (content script gone) is distinguishable from an empty result.
+    if (chrome.runtime.lastError) {
+      // The message never landed. Leave the article un-enriched so a later open or
+      // select can retry, rather than marking it done with no content.
+      applyUpdate(t.id, t);
+      return;
+    }
     if (resp && resp.ok && resp.data) {
       if (resp.data.text) t.text = resp.data.text;
       if (resp.data.images && resp.data.images.length) t.images = resp.data.images;

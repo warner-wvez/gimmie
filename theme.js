@@ -4,21 +4,32 @@
 // toggle; the choice is remembered across sessions.
 (function () {
   const root = document.documentElement;
+  const KEY = "gimmie-theme";
 
   function apply(dark) {
     root.classList.toggle("dark", dark);
   }
 
-  // Apply the saved (or system) theme as early as possible to limit any flash.
-  chrome.storage.local.get("theme", (r) => {
-    if (r.theme === "dark") apply(true);
-    else if (r.theme === "light") apply(false);
-    else if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) apply(true);
-  });
+  // This script runs in <head>, before the body paints. localStorage is synchronous
+  // (unlike chrome.storage), so reading the saved choice here applies the theme
+  // before the first paint — no flash of the wrong theme on open.
+  let saved = null;
+  try {
+    saved = localStorage.getItem(KEY);
+  } catch (e) {
+    /* private mode etc. */
+  }
+  if (saved === "dark") apply(true);
+  else if (saved === "light") apply(false);
+  else if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) apply(true);
 
   function setTheme(dark) {
     apply(dark);
-    chrome.storage.local.set({ theme: dark ? "dark" : "light" });
+    try {
+      localStorage.setItem(KEY, dark ? "dark" : "light");
+    } catch (e) {
+      /* ignore */
+    }
   }
 
   function isDark() {
