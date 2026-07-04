@@ -98,6 +98,14 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
   showView("start");
 });
 
+// ---------- Install / share guide ----------
+document.querySelectorAll("[data-open-install]").forEach((el) => {
+  el.addEventListener("click", (e) => {
+    e.preventDefault();
+    chrome.tabs.create({ url: chrome.runtime.getURL("install.html") });
+  });
+});
+
 // ---------- Welcome: go to bookmarks ----------
 
 document.getElementById("goToBookmarksBtn").addEventListener("click", () => {

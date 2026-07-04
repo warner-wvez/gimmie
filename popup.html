@@ -112,6 +112,8 @@
       padding: 10px;
     }
     .btn-ghost:hover { color: var(--ink); }
+    .install-link { margin-top: 10px; }
+    .install-link svg { width: 15px; height: 15px; }
 
     .btn-mini {
       flex: 1;
@@ -597,6 +599,11 @@
         Open My Bookmarks
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
+
+      <button class="btn btn-ghost install-link" data-open-install>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        New here? How to install &amp; share GIMMIE
+      </button>
     </div>
   </div>
 
@@ -631,6 +638,8 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
         <span>Keep this little window open while it works.</span>
       </div>
+
+      <button class="btn btn-ghost install-link" data-open-install style="margin-top:6px;">How to install &amp; share GIMMIE</button>
     </div>
   </div>
 
