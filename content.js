@@ -280,30 +280,39 @@
       const info = m.media_info || {};
       if (info.original_img_url) mediaById[m.media_id] = normImg(info.original_img_url);
     });
-    // entityMap keys referenced by atomic blocks -> media id.
-    const entityMap = {};
+    // entity key -> { type, mediaId }. Atomic blocks aren't all images: X uses them
+    // for dividers, emoji, links and embeds too, so we need the entity TYPE to tell
+    // a real image apart from a horizontal rule.
+    const entities = {};
     const em = cs.entityMap;
-    const emList = Array.isArray(em) ? em : Object.values(em || {});
+    const emList = Array.isArray(em) ? em : Object.entries(em || {}).map(([k, v]) => ({ key: k, value: v }));
     emList.forEach((e) => {
       const v = e.value || e;
+      const key = e.key != null ? e.key : v.key;
       const items = (v.data && v.data.mediaItems) || [];
-      if (items[0] && items[0].mediaId) entityMap[e.key != null ? e.key : v.key] = items[0].mediaId;
+      entities[key] = { type: v.type, mediaId: items[0] && items[0].mediaId };
     });
 
     const parts = [];
-    let atomicSeen = 0;
-    let atomicResolved = 0;
+    let imagesSeen = 0; // atomic blocks that are genuinely images
+    let imagesResolved = 0;
     for (const b of cs.blocks) {
       if (b.type === "atomic") {
-        // Atomic blocks reference an entity (image) via entityRanges[].key.
-        atomicSeen++;
         const key = b.entityRanges && b.entityRanges[0] && b.entityRanges[0].key;
-        const mediaId = entityMap[key];
-        const url = mediaId && mediaById[mediaId];
-        if (url) {
-          parts.push({ type: "image", value: url });
-          atomicResolved++;
+        const ent = key != null ? entities[key] : null;
+        const etype = ent && ent.type;
+        if (etype === "MEDIA") {
+          imagesSeen++;
+          const url = ent.mediaId && mediaById[ent.mediaId];
+          if (url) {
+            parts.push({ type: "image", value: url });
+            imagesResolved++;
+          }
+        } else if (etype === "DIVIDER") {
+          parts.push({ type: "text", value: "---" });
         }
+        // Other atomics (emoji, links, embedded tweets) have no standalone form
+        // here; skip them without counting them as lost images.
       } else {
         const text = (b.text || "").trim();
         if (!text) continue;
@@ -313,12 +322,12 @@
         else parts.push({ type: "text", value: text });
       }
     }
-    // If some inline images didn't resolve, say so loudly. Silent loss would mean
-    // shipping incomplete exports with no signal that X changed its article format.
-    if (atomicSeen > atomicResolved) {
-      console.warn(
-        `[GIMMIE] Article ${art.rest_id || "?"}: ${atomicSeen - atomicResolved} of ${atomicSeen} ` +
-          `inline images could not be matched. X's article format may have changed.`
+    // Warn only when a genuine image entity failed to resolve, which would signal an
+    // actual X format change. console.debug keeps it out of the extensions error list
+    // while still available in devtools for diagnosis.
+    if (imagesSeen > imagesResolved) {
+      console.debug(
+        `[GIMMIE] Article ${art.rest_id || "?"}: ${imagesSeen - imagesResolved} of ${imagesSeen} images could not be matched.`
       );
     }
     return parts.length ? parts : null;
