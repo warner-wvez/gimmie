@@ -784,7 +784,63 @@ function exportList(list, format) {
   else if (format === "json") triggerDownload(buildJsonFor(list), "application/json", `${name}.json`);
   else if (format === "csv") triggerDownload(buildCsvFor(list), "text/csv;charset=utf-8;", `${name}.csv`);
   else if (format === "zip") downloadZip(list);
+  else return; // unknown format: nothing exported, so no prompt
+  setTimeout(maybeShowStarPrompt, 700);
 }
+
+// ---------- "Star the repo" nudge, shown after an export ----------
+// Appears at most once per popup session, stops for good once the user stars or
+// dismisses, and gives up on its own after a few ignored showings so it never nags.
+const REPO_URL = "https://github.com/warner-wvez/gimmie";
+const STAR_KEY = "gimmie-star";
+const STAR_MAX_SHOWS = 3;
+let starShownThisSession = false;
+
+function maybeShowStarPrompt() {
+  if (starShownThisSession) return;
+  let state = null;
+  try {
+    state = localStorage.getItem(STAR_KEY);
+  } catch (e) {
+    /* private mode */
+  }
+  if (state === "done") return;
+  const shows = parseInt(state || "0", 10) || 0;
+  if (shows >= STAR_MAX_SHOWS) return;
+  try {
+    localStorage.setItem(STAR_KEY, String(shows + 1));
+  } catch (e) {
+    /* ignore */
+  }
+  starShownThisSession = true;
+  const toast = document.getElementById("star-toast");
+  toast.style.display = "flex";
+  void toast.offsetHeight; // force reflow so the slide-in transition runs reliably
+  toast.classList.add("show");
+  // Slide it back out on its own so the export controls aren't blocked for long.
+  setTimeout(() => hideStarPrompt(false), 9000);
+}
+
+function hideStarPrompt(done) {
+  const toast = document.getElementById("star-toast");
+  toast.classList.remove("show");
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 400);
+  if (done) {
+    try {
+      localStorage.setItem(STAR_KEY, "done");
+    } catch (e) {
+      /* ignore */
+    }
+  }
+}
+
+document.getElementById("starGoBtn").addEventListener("click", () => {
+  chrome.tabs.create({ url: REPO_URL });
+  hideStarPrompt(true);
+});
+document.getElementById("starDismissBtn").addEventListener("click", () => hideStarPrompt(true));
 
 // Wire every format button in the export bar (data-format attribute).
 document.querySelectorAll("#export-bar [data-format]").forEach((btn) => {

@@ -560,6 +560,37 @@
 
     /* Keep the sticky top bars clear of the hanging bulb */
     .scanbar, .detail-head { padding-right: 40px; }
+
+    /* ---------- Star prompt (slides up after an export) ---------- */
+    .star-toast {
+      position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 300;
+      display: none; align-items: center; gap: 11px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; box-shadow: 0 10px 30px var(--shadow);
+      padding: 12px 13px;
+      transform: translateY(150%); transition: transform 0.38s cubic-bezier(0.2, 0.85, 0.25, 1);
+    }
+    .star-toast.show { transform: translateY(0); }
+    .star-toast .star-ic { width: 26px; height: 26px; color: #f5b400; flex-shrink: 0; }
+    .star-toast-body { flex: 1; min-width: 0; }
+    .star-toast-body b { display: block; font-size: 13px; font-weight: 800; }
+    .star-toast-body span { font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .star-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .star-go {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--btn-bg); color: var(--btn-fg); border: none;
+      border-radius: 999px; padding: 8px 13px; font-size: 12.5px; font-weight: 700;
+      font-family: inherit; cursor: pointer; transition: background 0.2s, transform 0.1s;
+    }
+    .star-go:hover { background: var(--btn-bg-hover); }
+    .star-go:active { transform: scale(0.97); }
+    .star-go svg { width: 14px; height: 14px; }
+    .star-x {
+      background: transparent; border: none; color: var(--muted); cursor: pointer;
+      padding: 6px; display: flex; border-radius: 8px;
+    }
+    .star-x:hover { color: var(--ink); background: var(--surface-2); }
+    .star-x svg { width: 16px; height: 16px; }
   </style>
 </head>
 <body>
@@ -716,6 +747,24 @@
       </div>
     </div>
     <div class="detail-body" id="detail-body"></div>
+  </div>
+
+  <!-- ========== STAR PROMPT (after an export) ========== -->
+  <div id="star-toast" class="star-toast">
+    <svg class="star-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6 6.6.6-5 4.4 1.5 6.5L12 17.9 6 20.5l1.5-6.5-5-4.4 6.6-.6z"/></svg>
+    <div class="star-toast-body">
+      <b>Export saved</b>
+      <span>If GIMMIE helped, a star on GitHub goes a long way.</span>
+    </div>
+    <div class="star-actions">
+      <button id="starGoBtn" class="star-go">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6 6.6.6-5 4.4 1.5 6.5L12 17.9 6 20.5l1.5-6.5-5-4.4 6.6-.6z"/></svg>
+        Star
+      </button>
+      <button id="starDismissBtn" class="star-x" title="No thanks" aria-label="Dismiss">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
   </div>
 
   <script src="popup.js"></script>
