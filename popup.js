@@ -87,7 +87,6 @@ function setActivity(text) {
 
 const views = {
   welcome: document.getElementById("view-welcome"),
-  start: document.getElementById("view-start"),
   scan: document.getElementById("view-scan"),
   detail: document.getElementById("view-detail"),
 };
@@ -98,20 +97,17 @@ function showView(name) {
 
 // ---------- Init / routing ----------
 
-chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
   const tab = tabs[0];
   activeTabId = tab.id;
   const url = tab.url || "";
-  const onBookmarks = url.includes("x.com/i/bookmarks");
-  if (!onBookmarks) {
+  // On the bookmarks page, don't make them click anything: start collecting right
+  // away so they see their bookmarks the moment the popup opens.
+  if (url.includes("x.com/i/bookmarks")) {
+    startScan("full_export", true);
+  } else {
     showView("welcome");
-    return;
   }
-  const stored = await chrome.storage.local.get("latest_exported_tweet_id");
-  if (stored.latest_exported_tweet_id) {
-    document.getElementById("scanNewBtn").style.display = "block";
-  }
-  showView("start");
 });
 
 // ---------- Install / share guide ----------
@@ -125,31 +121,20 @@ document.querySelectorAll("[data-open-install]").forEach((el) => {
 // ---------- Welcome: go to bookmarks ----------
 
 document.getElementById("goToBookmarksBtn").addEventListener("click", () => {
-  const scanBtn = document.getElementById("scanAllBtn");
-  const startTitle = document.getElementById("start-title");
-  const startSub = document.getElementById("start-sub");
-  showView("start");
-  startTitle.innerText = "Loading your bookmarks...";
-  startSub.innerText = "Hang tight, we're opening your saved posts on X.";
-  scanBtn.disabled = true;
+  // Take them to their bookmarks, then start collecting automatically once it loads.
+  showView("scan");
+  document.getElementById("flow-row").style.display = "none";
+  document.getElementById("count-label").innerText = "opening your bookmarks...";
+  progressIndeterminate();
   chrome.tabs.update(activeTabId, { url: "https://x.com/i/bookmarks" });
   function onUpdated(tabId, info, tab) {
     if (tabId !== activeTabId || info.status !== "complete") return;
-    const u = tab.url || "";
-    if (!u.includes("/i/bookmarks")) return;
+    if (!(tab.url || "").includes("/i/bookmarks")) return;
     chrome.tabs.onUpdated.removeListener(onUpdated);
-    startTitle.innerText = "You're all set";
-    startSub.innerText = "Your bookmarks are open. Hit the button and we'll collect everything.";
-    scanBtn.disabled = false;
+    startScan("full_export", true);
   }
   chrome.tabs.onUpdated.addListener(onUpdated);
 });
-
-// ---------- Start: scan buttons ----------
-
-document.getElementById("scanAllBtn").addEventListener("click", () => startScan("full_export", true));
-document.getElementById("scanPickBtn").addEventListener("click", () => startScan("full_export", false));
-document.getElementById("scanNewBtn").addEventListener("click", () => startScan("smart_sync", true));
 
 function startScan(mode, autoProcess) {
   autoProcessArticles = autoProcess;
@@ -243,6 +228,7 @@ function handleStatus(s) {
 }
 
 function addCard(tweet) {
+  if (idToIndex.has(tweet.id)) return; // ignore duplicate broadcasts (defensive)
   const index = tweetsData.length;
   tweetsData.push(tweet);
   idToIndex.set(tweet.id, index);
