@@ -6,10 +6,11 @@ Everything runs locally in your browser. Your bookmarks never leave your machine
 
 ## What it does
 
-- **Collects your bookmarks fast.** Reads your saved posts through X's own data channel using your logged-in session, so there is no slow page scrolling.
+- **Shows your bookmarks the moment you open it.** No button to press, no scrolling. Open GIMMIE on your bookmarks page and it loads them all instantly through X's own data channel using your logged-in session.
 - **Reads full articles.** Long-form X articles come through complete: title, every paragraph in order, and every image placed inline where the author put it.
 - **Captures engagement stats.** Likes, reposts, replies, quotes, bookmarks, and views for every post.
-- **Exports in the format you want.** Markdown (recommended for AI tools), PDF, JSON, CSV, or a ZIP bundle.
+- **Search, filter, and sort.** Search by text, name, or handle; filter to tweets or articles; sort by recently or oldest bookmarked, newest or oldest posted, or most liked, viewed, and reposted.
+- **Exports in the format you want.** Markdown (recommended for AI tools), PDF, JSON, CSV, or a ZIP bundle. Exports follow whatever you've filtered and sorted, so you get exactly what you see.
 - **One, some, or all.** Export a single post, only the posts you check, or your whole archive.
 - **Light and dark mode.** Pull the light cord in the top corner to switch. Your choice is remembered.
 
@@ -26,10 +27,9 @@ GIMMIE is a standard Chrome/Edge extension. To run it from source:
 ## How to use
 
 1. Open [x.com/i/bookmarks](https://x.com/i/bookmarks) (the extension can take you there).
-2. Click the GIMMIE icon and choose how to collect:
-   - **Grab everything** — collects all bookmarks and reads every article, ready to export as one file.
-   - **Browse and pick** — lists your bookmarks quickly so you can open or check only the ones you want.
-3. Export. Markdown is the default and works best with NotebookLM and other AI tools. PDF, JSON, CSV, and ZIP are also available. There is also a one-click **Send to NotebookLM**.
+2. Click the GIMMIE icon. Your bookmarks load automatically, right away.
+3. Optionally search, filter, or sort to find what you want.
+4. Export. Markdown is the default and works best with NotebookLM and other AI tools. PDF, JSON, CSV, and ZIP are also available, and you can export everything, just the posts you check, or a single post. There is also a one-click **Send to NotebookLM**.
 
 ## How it works
 
