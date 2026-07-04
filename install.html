@@ -51,6 +51,11 @@
     .step-body h3 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
     .step-body p { color: var(--muted); font-size: 15px; }
     .step-body p + p { margin-top: 8px; }
+    .step-body .shot {
+      display: block; max-width: 100%; height: auto; margin: 12px 0 4px;
+      border: 1px solid #cfd9de; border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
     .step-body .path {
       display: inline-block; font-family: ui-monospace, "SF Mono", Menlo, monospace;
       background: #f0f3f5; border: 1px solid var(--border); border-radius: 6px;
@@ -134,7 +139,9 @@
         <div class="num">5</div>
         <div class="step-body">
           <h3>Click "Load unpacked" and pick the folder</h3>
-          <p>Click <strong>Load unpacked</strong> (top-left). In the file picker, select the <strong>folder</strong> you unzipped in step 2 (the one containing <span class="path">manifest.json</span>) and confirm.</p>
+          <p>After Developer mode is on, you'll see these buttons. Click <strong>Load unpacked</strong> (the one on the left):</p>
+          <img class="shot" src="assets/load-unpacked.jpg" alt="The Chrome Extensions toolbar showing Load unpacked, Pack extension, and Update buttons">
+          <p>In the file picker, select the <strong>folder</strong> you unzipped in step 2 (the one containing <span class="path">manifest.json</span>) and confirm.</p>
           <p>GIMMIE now appears in your list. That's it, it's installed.</p>
         </div>
       </div>
