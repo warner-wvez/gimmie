@@ -536,30 +536,40 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ---------- Pull-cord theme switch ---------- */
+    /* ---------- Pull-cord theme switch ----------
+       The bulb is the draggable element; the cord is a tall line attached above it,
+       so pulling the bulb down (a GPU transform, no layout) lengthens the visible
+       cord. It springs back on release. */
     #pull-switch {
-      position: fixed; top: 0; right: 13px; z-index: 200;
-      display: flex; flex-direction: column; align-items: center;
-      width: 20px; user-select: none; touch-action: none;
-    }
-    #pull-switch .cord {
-      width: 2px; height: 16px;
-      background: linear-gradient(var(--border), var(--muted));
-      border-radius: 0 0 2px 2px;
+      position: fixed; top: 0; right: 15px; z-index: 200;
+      width: 20px; height: 44px; user-select: none;
     }
     #pull-switch .bulb {
-      width: 16px; height: 16px; border-radius: 50%;
+      position: absolute; top: 12px; left: 0;
+      width: 18px; height: 18px; border-radius: 50%;
       background: radial-gradient(circle at 35% 30%, #fef9c3, #fcd34d, #facc15);
-      box-shadow: 0 0 14px 4px rgba(250,204,21,0.55);
-      cursor: grab;
-      transition: background 0.35s ease, box-shadow 0.35s ease;
+      box-shadow: 0 0 15px 5px rgba(250,204,21,0.5);
+      cursor: grab; touch-action: none; will-change: transform;
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+    }
+    /* Only the transform gets the spring easing, and only while releasing */
+    #pull-switch .bulb.springing {
+      transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  background 0.4s ease, box-shadow 0.4s ease;
     }
     :root.dark #pull-switch .bulb {
       background: radial-gradient(circle at 35% 30%, #4b5563, #1f2937, #000);
-      box-shadow: 0 0 12px 3px rgba(31,41,55,0.75);
+      box-shadow: 0 0 13px 4px rgba(31,41,55,0.7);
     }
-    #pull-switch.dragging .bulb { cursor: grabbing; }
+    #pull-switch .bulb.grabbing { cursor: grabbing; }
     #pull-switch .bulb:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+    #pull-switch .cord {
+      position: absolute; left: 50%; bottom: 100%;
+      transform: translateX(-50%);
+      width: 2px; height: 100vh;
+      background: linear-gradient(to bottom, transparent, var(--border) 60%, var(--muted));
+      pointer-events: none;
+    }
 
     /* Keep the sticky top bars clear of the hanging bulb */
     .scanbar, .detail-head { padding-right: 40px; }
@@ -650,8 +660,7 @@
 <body>
 
   <div id="pull-switch" title="Pull the cord to switch light / dark">
-    <div class="cord"></div>
-    <div class="bulb"></div>
+    <div class="bulb"><span class="cord"></span></div>
   </div>
 
   <!-- ========== WELCOME (not on bookmarks page) ========== -->

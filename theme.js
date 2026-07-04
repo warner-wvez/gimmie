@@ -40,50 +40,58 @@
   document.addEventListener("DOMContentLoaded", () => {
     const sw = document.getElementById("pull-switch");
     if (!sw) return;
-    const cord = sw.querySelector(".cord");
     const bulb = sw.querySelector(".bulb");
 
-    // Kept deliberately small: an extension popup closes the instant the pointer
-    // leaves its bounds, so a long drag would dismiss the popup mid-gesture. A
-    // short pull (and a plain tap) keep the whole interaction inside the window.
-    const BASE = 14; // resting cord length
-    const MAX = 30; // how far it can be pulled (stays within the popup)
-    const THRESHOLD = 18; // pull past this = a deliberate toggle
-    const TAP = 4; // pull under this = a tap (also toggles)
+    // The bulb is dragged straight down and follows the pointer 1:1 via a transform
+    // (no layout thrash). Pull past THRESHOLD, or a plain tap, toggles the theme.
+    // Travel is capped so the gesture stays inside the popup (a popup closes if the
+    // pointer leaves its bounds).
+    const MAX = 40; // furthest the bulb can be pulled, in px
+    const THRESHOLD = 22; // pull past this = a deliberate toggle
+    const TAP = 5; // release under this = a tap (also toggles)
 
     let dragging = false;
     let startY = 0;
-    let pulled = 0;
+    let y = 0; // current pull distance
+
+    const setY = (v) => {
+      bulb.style.transform = "translateY(" + v + "px)";
+    };
+
+    function onDown(e) {
+      dragging = true;
+      startY = e.clientY;
+      y = 0;
+      bulb.classList.remove("springing"); // follow the finger with no easing
+      bulb.classList.add("grabbing");
+      try {
+        bulb.setPointerCapture(e.pointerId);
+      } catch (_) {}
+      e.preventDefault();
+    }
 
     function onMove(e) {
       if (!dragging) return;
-      pulled = Math.max(0, Math.min(MAX, e.clientY - startY));
-      cord.style.height = BASE + pulled + "px";
+      y = Math.max(0, Math.min(MAX, e.clientY - startY));
+      setY(y);
     }
 
-    function end() {
+    function onUp() {
       if (!dragging) return;
       dragging = false;
-      sw.classList.remove("dragging");
-      if (pulled < TAP || pulled >= THRESHOLD) setTheme(!isDark());
-      // Spring the cord back with a little bounce.
-      cord.style.transition = "height 0.4s cubic-bezier(0.5, 1.7, 0.4, 1)";
-      cord.style.height = BASE + "px";
-      setTimeout(() => (cord.style.transition = ""), 420);
-      pulled = 0;
+      bulb.classList.remove("grabbing");
+      const toggle = y < TAP || y >= THRESHOLD;
+      bulb.classList.add("springing"); // spring back with a bounce
+      setY(0);
+      if (toggle) setTheme(!isDark());
+      y = 0;
     }
 
-    bulb.addEventListener("pointerdown", (e) => {
-      dragging = true;
-      startY = e.clientY;
-      pulled = 0;
-      sw.classList.add("dragging");
-      bulb.setPointerCapture(e.pointerId);
-      e.preventDefault();
-    });
+    bulb.addEventListener("pointerdown", onDown);
     bulb.addEventListener("pointermove", onMove);
-    bulb.addEventListener("pointerup", end);
-    bulb.addEventListener("pointercancel", end);
+    bulb.addEventListener("pointerup", onUp);
+    bulb.addEventListener("pointercancel", onUp);
+    bulb.addEventListener("lostpointercapture", onUp);
 
     // Keyboard access.
     bulb.setAttribute("tabindex", "0");

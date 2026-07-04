@@ -62,6 +62,10 @@ Because it depends on how X structures its data, X changing its site can occasio
 | CSV | Spreadsheets |
 | ZIP | The full archive plus one Markdown file per post |
 
+## Roadmap
+
+- **Bookmark folders.** GIMMIE already exports *all* your bookmarks, including any you've organized into folders (X keeps those in your main list too, so nothing is missed). Per-folder export and folder labels are coming soon.
+
 ## Privacy
 
 No data collection, no external servers, no tracking. Everything happens locally in your browser using your own session. Full details in [PRIVACY.md](PRIVACY.md).
