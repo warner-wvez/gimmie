@@ -97,7 +97,7 @@
 
     <div class="callout info">
       <span class="ic">&#9432;</span>
-      <div><b>Why these steps?</b> GIMMIE is being reviewed for the Chrome Web Store. Until it is approved, you add it manually with the steps below. Once it is on the store, it will be a single click. These steps work in <b>Chrome</b>, <b>Edge</b>, <b>Brave</b>, and other Chrome-based browsers.</div>
+      <div><b>Why these steps?</b> GIMMIE is being reviewed for the Chrome Web Store. Until it is approved, you add it manually with the steps below. Once it is on the store, it will be a single click. These steps work in <b>Chrome</b>, <b>Edge</b>, <b>Brave</b>, and other Chrome-based browsers. Firefox and Safari are not supported.</div>
     </div>
 
     <div class="steps">
@@ -105,7 +105,8 @@
         <div class="num">1</div>
         <div class="step-body">
           <h3>Download GIMMIE</h3>
-          <p>On the GIMMIE GitHub page, click the green <strong>Code</strong> button, then <strong>Download ZIP</strong>. (If someone shared a ZIP with you directly, just use that.)</p>
+          <p><a href="https://github.com/warner-wvez/gimmie/archive/refs/heads/main.zip"><strong>Click here to download the ZIP.</strong></a> One click, that's the whole download.</p>
+          <p>Or, on the <a href="https://github.com/warner-wvez/gimmie">GIMMIE GitHub page</a>, click the green <strong>Code</strong> button, then <strong>Download ZIP</strong>. (If someone shared a ZIP with you directly, just use that.)</p>
         </div>
       </div>
 
@@ -113,7 +114,9 @@
         <div class="num">2</div>
         <div class="step-body">
           <h3>Unzip it, and keep the folder</h3>
-          <p>Double-click the downloaded ZIP to unzip it. You will get a folder with files inside it, including one called <span class="path">manifest.json</span>.</p>
+          <p><strong>On a Mac:</strong> double-click the downloaded ZIP. A folder appears next to it.</p>
+          <p><strong>On Windows:</strong> right-click the ZIP and choose <strong>Extract All</strong>, then <strong>Extract</strong>. Double-clicking is not enough on Windows: that only opens a preview of the ZIP that looks like a folder but isn't one.</p>
+          <p>Either way you end up with a folder named <span class="path">gimmie-main</span> with files inside it, including one called <span class="path">manifest.json</span>.</p>
           <p><strong>Put this folder somewhere permanent</strong> (like your Documents), because GIMMIE runs from it. If you delete or move the folder later, the extension stops working.</p>
         </div>
       </div>
@@ -131,7 +134,7 @@
         <div class="num">4</div>
         <div class="step-body">
           <h3>Turn on Developer mode</h3>
-          <p>Find the <strong>Developer mode</strong> switch in the <strong>top-right corner</strong> of that page and turn it on. A new row of buttons will appear.</p>
+          <p>In <strong>Chrome</strong> and <strong>Brave</strong>, the <strong>Developer mode</strong> switch is in the <strong>top-right corner</strong> of that page. In <strong>Edge</strong>, it's in the <strong>left sidebar</strong>. Turn it on, and a new row of buttons will appear.</p>
         </div>
       </div>
 
@@ -139,9 +142,9 @@
         <div class="num">5</div>
         <div class="step-body">
           <h3>Click "Load unpacked" and pick the folder</h3>
-          <p>After Developer mode is on, you'll see these buttons. Click <strong>Load unpacked</strong> (the one on the left):</p>
+          <p>After Developer mode is on, you'll see new buttons. Click <strong>Load unpacked</strong>:</p>
           <img class="shot" src="assets/load-unpacked.jpg" alt="The Chrome Extensions toolbar showing Load unpacked, Pack extension, and Update buttons">
-          <p>In the file picker, select the <strong>folder</strong> you unzipped in step 2 (the one containing <span class="path">manifest.json</span>) and confirm.</p>
+          <p>In the file picker, select the <span class="path">gimmie-main</span> <strong>folder</strong> you unzipped in step 2 (the one containing <span class="path">manifest.json</span>) and confirm.</p>
           <p>GIMMIE now appears in your list. That's it, it's installed.</p>
         </div>
       </div>
@@ -176,8 +179,8 @@
         <p>Developer mode isn't on yet. Flip the switch in the top-right of the Extensions page (step 4), then try again.</p>
       </details>
       <details>
-        <summary>It asked me to pick a file, but nothing happened</summary>
-        <p>You need to select the whole <strong>folder</strong>, not a single file inside it. Pick the folder that directly contains <span class="path">manifest.json</span>.</p>
+        <summary>It says "Manifest file is missing or unreadable"</summary>
+        <p>You picked the wrong folder, or (on Windows) you picked the ZIP itself, which only looks like a folder. Select the unzipped <span class="path">gimmie-main</span> folder, the one that directly contains <span class="path">manifest.json</span>. On Windows, make sure you extracted first: right-click the ZIP and choose <strong>Extract All</strong>.</p>
       </details>
       <details>
         <summary>The extension disappeared or stopped working</summary>
@@ -185,11 +188,16 @@
       </details>
       <details>
         <summary>GIMMIE opens but finds nothing on my bookmarks</summary>
-        <p>Make sure you are signed in to X and actually on your bookmarks page (<span class="path">x.com/i/bookmarks</span>), then scan again. X occasionally changes its site, which can require a GIMMIE update, if it keeps happening, please report it on the project page.</p>
+        <p>GIMMIE tells you which of the two causes it is: either you aren't signed in to X in this browser, or your bookmarks list is genuinely empty. Fix the one it names, then click <strong>Start over</strong> in the popup. If GIMMIE shows its welcome screen instead of your bookmarks, you aren't on the bookmarks page yet, click <strong>Open My Bookmarks</strong> and it takes you there. X occasionally changes its site, which can require a GIMMIE update, if it keeps happening, please report it on the project page.</p>
       </details>
       <details>
         <summary>How do I update to a newer version?</summary>
-        <p>Download the new version, unzip it over the same folder (replacing the files), then click the refresh icon on GIMMIE's card in the Extensions page.</p>
+        <p>Download the new ZIP and unzip it. Delete the old <span class="path">gimmie-main</span> folder, then move the new one into the exact same place with the exact same name. Finally, click the circular refresh arrow on GIMMIE's card on the Extensions page. Because the folder has the same name and location, the browser picks up the new version right away.</p>
+        <p>Heads up for Mac users: unzipping "over" the old folder doesn't merge anything, it just creates a second folder called <span class="path">gimmie-main 2</span>. That's why you delete the old one first.</p>
+      </details>
+      <details>
+        <summary>My browser warned me about "developer mode extensions"</summary>
+        <p>Chrome sometimes shows a popup at startup about developer mode extensions, listing GIMMIE with a <strong>Disable</strong> button. That warning is normal for any extension installed outside the Chrome Web Store. Close it or choose to keep the extension. If you already clicked Disable, go to <span class="path">chrome://extensions</span> and flip GIMMIE's toggle back on.</p>
       </details>
       <details>
         <summary>Is it safe to keep Developer mode on?</summary>

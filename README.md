@@ -31,11 +31,14 @@ The export is structured for AI tools by default, so the model reads the whole p
 
 GIMMIE is a standard Chrome/Edge extension. To run it from source:
 
-1. Download or clone this repository.
-2. Open `chrome://extensions` in your browser.
-3. Turn on **Developer mode** (top right).
-4. Click **Load unpacked** and select the folder containing `manifest.json`.
-5. Pin the extension, open your X bookmarks, and click the icon.
+1. [Download the ZIP](https://github.com/warner-wvez/gimmie/archive/refs/heads/main.zip) (or clone this repository).
+2. Unzip it: double-click on Mac, right-click and **Extract All** on Windows. Keep the resulting `gimmie-main` folder somewhere permanent, GIMMIE runs from it.
+3. Open `chrome://extensions` in your browser (Edge: `edge://extensions`).
+4. Turn on **Developer mode** (top right in Chrome and Brave, left sidebar in Edge).
+5. Click **Load unpacked** and select the `gimmie-main` folder (the one containing `manifest.json`).
+6. Pin the extension, open your X bookmarks, and click the icon.
+
+For a friendlier walkthrough with screenshots and troubleshooting, open [install.html](install.html), it's also linked from inside the extension.
 
 ## How to use
 
