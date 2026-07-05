@@ -62,6 +62,7 @@
       padding: 2px 8px; font-size: 13.5px; color: var(--ink); margin: 2px 0;
     }
     .step-body strong { color: var(--ink); }
+    .step-body a strong { color: var(--blue); }
 
     h2 {
       font-size: 20px; font-weight: 800; margin: 40px 0 14px;
@@ -84,10 +85,28 @@
       border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 5px;
       padding: 1px 6px; font-size: 13px;
     }
-    @media (max-width: 480px) { body { padding: 24px 14px; } h1 { font-size: 25px; } .step { padding: 16px; gap: 14px; } }
+    .picker {
+      display: flex; justify-content: center; gap: 4px; margin: 24px auto 6px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+      padding: 4px; width: max-content; max-width: 100%;
+    }
+    .picker button {
+      border: 0; background: transparent; font: inherit; font-weight: 700; font-size: 14.5px;
+      color: var(--muted); padding: 8px 22px; border-radius: 999px; cursor: pointer;
+    }
+    .picker button.active { background: var(--blue); color: #fff; }
+    .picker-note { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 2px; }
+
+    /* !important so these beat higher-specificity display rules like .step-body .shot */
+    [data-b] { display: none !important; }
+    body[data-browser="chrome"] [data-b~="chrome"],
+    body[data-browser="edge"] [data-b~="edge"],
+    body[data-browser="brave"] [data-b~="brave"] { display: revert !important; }
+
+    @media (max-width: 480px) { body { padding: 24px 14px; } h1 { font-size: 25px; } .step { padding: 16px; gap: 14px; } .picker button { padding: 8px 14px; } }
   </style>
 </head>
-<body>
+<body data-browser="chrome">
   <div class="wrap">
     <header>
       <div class="bulb"></div>
@@ -97,8 +116,15 @@
 
     <div class="callout info">
       <span class="ic">&#9432;</span>
-      <div><b>Why these steps?</b> GIMMIE is being reviewed for the Chrome Web Store. Until it is approved, you add it manually with the steps below. Once it is on the store, it will be a single click. These steps work in <b>Chrome</b>, <b>Edge</b>, <b>Brave</b>, and other Chrome-based browsers. Firefox and Safari are not supported.</div>
+      <div><b>Why these steps?</b> GIMMIE is being reviewed for the Chrome Web Store. Until it is approved, you add it manually with the steps below. Once it is on the store, it will be a single click. GIMMIE works in <b>Chrome</b>, <b>Edge</b>, and <b>Brave</b>. Firefox and Safari are not supported.</div>
     </div>
+
+    <div class="picker" id="browser-picker" aria-label="Choose your browser">
+      <button type="button" data-pick="chrome" class="active">Chrome</button>
+      <button type="button" data-pick="edge">Edge</button>
+      <button type="button" data-pick="brave">Brave</button>
+    </div>
+    <p class="picker-note">The steps below match the browser you pick. We guessed yours automatically, change it if we got it wrong.</p>
 
     <div class="steps">
       <div class="step">
@@ -125,8 +151,12 @@
         <div class="num">3</div>
         <div class="step-body">
           <h3>Open your browser's Extensions page</h3>
-          <p>In the address bar, type <span class="path">chrome://extensions</span> and press <kbd>Enter</kbd>. On Edge, use <span class="path">edge://extensions</span>.</p>
-          <p>You can also reach it from the menu: <strong>&#8942; &rarr; Extensions &rarr; Manage Extensions</strong>.</p>
+          <p data-b="chrome">In the address bar, type <span class="path">chrome://extensions</span> and press <kbd>Enter</kbd>.</p>
+          <p data-b="chrome">You can also reach it from the menu: <strong>&#8942; &rarr; Extensions &rarr; Manage Extensions</strong>.</p>
+          <p data-b="edge">In the address bar, type <span class="path">edge://extensions</span> and press <kbd>Enter</kbd>.</p>
+          <p data-b="edge">You can also reach it from the menu: <strong>&#8943; (Settings and more) &rarr; Extensions &rarr; Manage extensions</strong>.</p>
+          <p data-b="brave">In the address bar, type <span class="path">brave://extensions</span> and press <kbd>Enter</kbd>.</p>
+          <p data-b="brave">You can also reach it from the menu: <strong>&#9776; &rarr; Extensions</strong>.</p>
         </div>
       </div>
 
@@ -134,7 +164,8 @@
         <div class="num">4</div>
         <div class="step-body">
           <h3>Turn on Developer mode</h3>
-          <p>In <strong>Chrome</strong> and <strong>Brave</strong>, the <strong>Developer mode</strong> switch is in the <strong>top-right corner</strong> of that page. In <strong>Edge</strong>, it's in the <strong>left sidebar</strong>. Turn it on, and a new row of buttons will appear.</p>
+          <p data-b="chrome brave">Find the <strong>Developer mode</strong> switch in the <strong>top-right corner</strong> of that page and turn it on. A new row of buttons will appear at the top.</p>
+          <p data-b="edge">Find the <strong>Developer mode</strong> toggle in the <strong>left sidebar</strong> of that page, near the bottom, and turn it on. New buttons will appear.</p>
         </div>
       </div>
 
@@ -143,7 +174,7 @@
         <div class="step-body">
           <h3>Click "Load unpacked" and pick the folder</h3>
           <p>After Developer mode is on, you'll see new buttons. Click <strong>Load unpacked</strong>:</p>
-          <img class="shot" src="assets/load-unpacked.jpg" alt="The Chrome Extensions toolbar showing Load unpacked, Pack extension, and Update buttons">
+          <img class="shot" data-b="chrome brave" src="assets/load-unpacked.jpg" alt="The Extensions toolbar showing Load unpacked, Pack extension, and Update buttons">
           <p>In the file picker, select the <span class="path">gimmie-main</span> <strong>folder</strong> you unzipped in step 2 (the one containing <span class="path">manifest.json</span>) and confirm.</p>
           <p>GIMMIE now appears in your list. That's it, it's installed.</p>
         </div>
@@ -153,7 +184,8 @@
         <div class="num">6</div>
         <div class="step-body">
           <h3>Pin it so it's easy to find</h3>
-          <p>Click the puzzle-piece icon <strong>&#129513;</strong> near the address bar, then click the pin next to GIMMIE. Its icon will stay in your toolbar.</p>
+          <p data-b="chrome brave">Click the puzzle-piece icon <strong>&#129513;</strong> near the address bar, then click the pin next to GIMMIE. Its icon will stay in your toolbar.</p>
+          <p data-b="edge">Click the puzzle-piece icon <strong>&#129513;</strong> near the address bar, then click the eye icon (<strong>Show in toolbar</strong>) next to GIMMIE. Its icon will stay in your toolbar.</p>
         </div>
       </div>
 
@@ -176,7 +208,8 @@
     <div class="faq">
       <details>
         <summary>"Load unpacked" is greyed out or missing</summary>
-        <p>Developer mode isn't on yet. Flip the <strong>Developer mode</strong> switch on the Extensions page (top-right in Chrome and Brave, left sidebar in Edge, see step 4), then try again.</p>
+        <p data-b="chrome brave">Developer mode isn't on yet. Flip the <strong>Developer mode</strong> switch in the top-right of the Extensions page (step 4), then try again.</p>
+        <p data-b="edge">Developer mode isn't on yet. Flip the <strong>Developer mode</strong> toggle in the left sidebar of the Extensions page (step 4), then try again.</p>
       </details>
       <details>
         <summary>It says "Manifest file is missing or unreadable"</summary>
@@ -192,12 +225,16 @@
       </details>
       <details>
         <summary>How do I update to a newer version?</summary>
-        <p>Download the new ZIP and unzip it. Delete the old <span class="path">gimmie-main</span> folder, then move the new one into the exact same place with the exact same name. Finally, click the circular refresh arrow on GIMMIE's card on the Extensions page (if you don't see it, turn Developer mode back on first). Because the folder has the same name and location, the browser picks up the new version right away.</p>
+        <p>Download the new ZIP and unzip it. Delete the old <span class="path">gimmie-main</span> folder, then move the new one into the exact same place with the exact same name.</p>
+        <p data-b="chrome brave">Finally, click the circular refresh arrow on GIMMIE's card on the Extensions page (if you don't see it, turn Developer mode back on first). Because the folder has the same name and location, the browser picks up the new version right away.</p>
+        <p data-b="edge">Finally, click the <strong>Reload</strong> link on GIMMIE's card on the Extensions page (if you don't see it, turn Developer mode back on first). Because the folder has the same name and location, Edge picks up the new version right away.</p>
         <p>Heads up for Mac users: unzipping "over" the old folder doesn't merge anything, it just creates a second folder called <span class="path">gimmie-main 2</span>. That's why you delete the old one first.</p>
       </details>
       <details>
         <summary>My browser warned me about "developer mode extensions"</summary>
-        <p>Chrome sometimes shows a popup at startup about developer mode extensions, listing GIMMIE with a <strong>Disable</strong> button. That warning is normal for any extension installed outside the Chrome Web Store. Close it or choose to keep the extension. If you already clicked Disable, go to <span class="path">chrome://extensions</span> and flip GIMMIE's toggle back on.</p>
+        <p data-b="chrome">Chrome sometimes shows a popup at startup about developer mode extensions, listing GIMMIE with a <strong>Disable</strong> button. That warning is normal for any extension installed outside the Chrome Web Store. Close it or choose to keep the extension. If you already clicked Disable, go to <span class="path">chrome://extensions</span> and flip GIMMIE's toggle back on.</p>
+        <p data-b="edge">Edge may occasionally warn you about extensions installed from outside its store. That warning is normal for any extension you loaded yourself. Keep the extension. If it got turned off, go to <span class="path">edge://extensions</span> and flip GIMMIE's toggle back on.</p>
+        <p data-b="brave">Brave may occasionally warn you about extensions installed from outside the Chrome Web Store. That warning is normal for any extension you loaded yourself. Keep the extension. If it got turned off, go to <span class="path">brave://extensions</span> and flip GIMMIE's toggle back on.</p>
       </details>
       <details>
         <summary>Is it safe to keep Developer mode on?</summary>
@@ -210,5 +247,6 @@
       Not affiliated with or endorsed by X Corp.
     </footer>
   </div>
+  <script src="install.js"></script>
 </body>
 </html>
