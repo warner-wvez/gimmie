@@ -2,6 +2,11 @@
 
 Turn the guides, threads, and how-tos you bookmark on X into clean files your LLM can actually read, so you can hand a whole playbook to Claude, ChatGPT, or NotebookLM and have it apply the steps to your own project.
 
+[![Open the install guide](https://img.shields.io/badge/How_to_Install-Step_by_step_guide-1D9BF0?style=for-the-badge&labelColor=0A0A0A)](https://warner-wvez.github.io/gimmie/install.html)
+[![Download the ZIP](https://img.shields.io/badge/Download-ZIP-FACC15?style=for-the-badge&labelColor=0A0A0A)](https://github.com/warner-wvez/gimmie/archive/refs/heads/main.zip)
+
+New here? Click **How to Install** above: it's a plain-English walkthrough with pictures and troubleshooting, about two minutes, no coding and no GitHub knowledge needed.
+
 GIMMIE pulls the full text of posts and articles, keeps images in order, includes engagement stats, and exports to Markdown, PDF, JSON, CSV, or ZIP. Everything runs locally in your browser: your bookmarks never leave your machine and GIMMIE collects nothing about you. See [PRIVACY.md](PRIVACY.md).
 
 > **Still early.** GIMMIE works today, but I'm actively sharpening it. Expect rough edges, and if something breaks or you have an idea, please open an issue.
@@ -38,7 +43,7 @@ GIMMIE is a standard Chrome/Edge extension. To run it from source:
 5. Click **Load unpacked** and select the `gimmie-main` folder (the one containing `manifest.json`).
 6. Pin the extension, open your X bookmarks, and click the icon.
 
-For a friendlier walkthrough with screenshots and troubleshooting, open [install.html](install.html), it's also linked from inside the extension.
+For a friendlier walkthrough with screenshots and troubleshooting, open the [install guide](https://warner-wvez.github.io/gimmie/install.html), it's also linked from inside the extension.
 
 ## How to use
 
