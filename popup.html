@@ -386,6 +386,14 @@
       cursor: pointer;
       accent-color: var(--blue);
     }
+    .select-all-row {
+      display: flex; align-items: center; gap: 8px;
+      width: max-content;
+      font-size: 13px; font-weight: 700; color: var(--muted);
+      cursor: pointer; user-select: none;
+    }
+    .select-all-row:hover { color: var(--ink); }
+    .select-all-row .card-check { margin: 0; }
     .card-body { flex: 1; min-width: 0; cursor: pointer; }
     .card-body:hover .c-user { color: var(--blue); }
     .card-top {
@@ -749,6 +757,10 @@
           <option value="reposts">Most reposted</option>
         </select>
       </div>
+      <label class="select-all-row" id="selectAllRow" title="Select every post shown below">
+        <input type="checkbox" class="card-check" id="selectAllCheck">
+        <span id="selectAllLabel">Select all</span>
+      </label>
     </div>
 
     <div id="results-area"></div>

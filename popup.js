@@ -10,6 +10,7 @@ let idToIndex = new Map();
 let cardTextEls = [];
 let cardEls = [];
 let selectedIdx = new Set();
+let exportBarEnabled = false; // whether the "download all" bar may show (set once a full scan finishes)
 let currentDetailTweet = null;
 let activeTabId = null;
 
@@ -150,8 +151,12 @@ function startScan(mode, autoProcess) {
   document.getElementById("count").innerText = "0";
   document.getElementById("count-label").innerText = "found so far";
   document.getElementById("scan-count").classList.remove("done");
+  exportBarEnabled = false;
   document.getElementById("export-bar").style.display = "none";
   document.getElementById("selbar").style.display = "none";
+  const selectAllBox = document.getElementById("selectAllCheck");
+  selectAllBox.checked = false;
+  selectAllBox.indeterminate = false;
   document.getElementById("scanAgainBtn").style.display = "none";
   const stopBtn = document.getElementById("stopBtn");
   stopBtn.style.display = "block";
@@ -365,6 +370,7 @@ function applyFilterSort() {
   document.getElementById("no-match").style.display =
     hasResults && ordered.length === 0 ? "block" : "none";
   updateExportLabel(ordered.length);
+  updateSelectAll();
 }
 
 // When a filter/search narrows the list, the bulk export follows what's shown.
@@ -445,6 +451,7 @@ function finishScan(info) {
   applyFilterSort(); // settle the final order/filter now that everything is in
   if (autoProcessArticles) {
     document.getElementById("count-label").innerText = "ready to export";
+    exportBarEnabled = true;
     document.getElementById("export-bar").style.display = "block";
   } else {
     document.getElementById("count-label").innerText = "pick posts to export";
@@ -531,7 +538,9 @@ function requestArticle(index) {
 
 // ---------- Selection ----------
 
-function toggleSelect(index, on) {
+// Core state change only; callers refresh the bars when the batch is done, so
+// select-all doesn't rebuild the UI once per post.
+function setSelected(index, on) {
   if (on) {
     selectedIdx.add(index);
     requestArticle(index);
@@ -539,6 +548,10 @@ function toggleSelect(index, on) {
     selectedIdx.delete(index);
   }
   if (cardEls[index]) cardEls[index].classList.toggle("selected", on);
+}
+
+function toggleSelect(index, on) {
+  setSelected(index, on);
   updateSelbar();
 }
 
@@ -553,6 +566,11 @@ function selectionPending() {
 function updateSelbar() {
   const n = selectedIdx.size;
   const bar = document.getElementById("selbar");
+  // One export surface at a time: while posts are checked, the "download all" bar
+  // hides so there's no ambiguity about what a download button will export.
+  document.getElementById("export-bar").style.display =
+    n === 0 && exportBarEnabled ? "block" : "none";
+  updateSelectAll();
   if (n === 0) {
     bar.style.display = "none";
     return;
@@ -560,9 +578,29 @@ function updateSelbar() {
   bar.style.display = "block";
   const pending = selectionPending();
   bar.querySelectorAll("[data-format]").forEach((b) => (b.disabled = pending));
+  const scope = n === tweetsData.length ? `All ${n} selected` : `${n} selected`;
   document.getElementById("sel-count").innerText = pending
-    ? `${n} selected · reading article...`
-    : `${n} selected`;
+    ? `${scope} · reading article...`
+    : scope;
+}
+
+// Keep the select-all checkbox mirroring the selection: checked when every visible
+// post is selected, indeterminate when only some are. Its label counts what it
+// covers, following the active filter the same way the bulk export does.
+function updateSelectAll() {
+  const box = document.getElementById("selectAllCheck");
+  const visible = visibleOrderedIndices();
+  let selectedVisible = 0;
+  visible.forEach((i) => {
+    if (selectedIdx.has(i)) selectedVisible++;
+  });
+  const all = visible.length > 0 && selectedVisible === visible.length;
+  box.checked = all;
+  box.indeterminate = selectedVisible > 0 && !all;
+  document.getElementById("selectAllLabel").textContent =
+    filtersActive() && visible.length < tweetsData.length
+      ? `Select all ${visible.length} shown`
+      : `Select all${tweetsData.length ? ` ${tweetsData.length}` : ""}`;
 }
 
 // ---------- Detail view ----------
@@ -994,7 +1032,7 @@ document.querySelectorAll("#selbar [data-format]").forEach((btn) => {
   });
 });
 
-document.getElementById("selClearBtn").addEventListener("click", () => {
+function clearSelection() {
   selectedIdx.forEach((i) => {
     if (!cardEls[i]) return;
     cardEls[i].classList.remove("selected");
@@ -1003,6 +1041,24 @@ document.getElementById("selClearBtn").addEventListener("click", () => {
   });
   selectedIdx = new Set();
   updateSelbar();
+}
+
+document.getElementById("selClearBtn").addEventListener("click", clearSelection);
+
+// Select-all: checking it selects every post the current filter shows; unchecking
+// clears the whole selection.
+document.getElementById("selectAllCheck").addEventListener("change", (e) => {
+  if (e.target.checked) {
+    visibleOrderedIndices().forEach((i) => {
+      if (selectedIdx.has(i)) return;
+      const cb = cardEls[i] && cardEls[i].querySelector(".card-check");
+      if (cb) cb.checked = true;
+      setSelected(i, true);
+    });
+    updateSelbar();
+  } else {
+    clearSelection();
+  }
 });
 
 // Single post from the detail view, in the chosen format.
